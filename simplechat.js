@@ -6,6 +6,43 @@ SimpleChat.configure({
     showReceived: true,
     showJoined: true,
 })
+
+//TODO: get points/awards for unlocking / visiting new bubbles and have these points/awards get announced to the rest of the chat, also getting points/awards gives people perks for their usernames or avatars or whatever.
+bubbles = [
+{
+"name": "Cardale's Crib",
+"left": -83.048049,
+"right": -82.997284,
+"top": 40.019415,
+"bottom": 39.989883
+},
+{ 
+"name": "Bearcat Babies",
+"left": -84.519341,
+"right": -84.509236,
+"top": 39.135752,
+"bottom": 39.124469
+}
+];
+
+
+function getBubble(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    console.log("geolocation not supported");
+  }
+}
+function showPosition(position){
+  console.log(determineBubble(position.coords.latitude, position.coords.longitude));
+}
+function determineBubble(lat, long){
+  var bubble;
+  var filtered = bubbles.filter(function(b) {return b.left < lat && b.right > lat && b.top > long && b.bottom < long;})
+  console.log(filtered, bubbles);
+  return filtered ? filtered[0].name : "Earth";
+}
+
 if (Meteor.isClient) {
 
 
@@ -13,6 +50,7 @@ if (Meteor.isClient) {
         'click button': function (e) {
 
             e.preventDefault()
+            getBubble();
             var roomId = $(e.target).val()
             var username = $("#username").val()
             if (!username) {
@@ -34,8 +72,10 @@ if (Meteor.isClient) {
     Template.home.helpers({
         'random': function () {
             return Random.id(5)
+        },
+        'bubbles': function () {
+          return bubbles;
         }
-
     });
 
     Template.room.onRendered(function () {
